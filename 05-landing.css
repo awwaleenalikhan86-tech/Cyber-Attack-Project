@@ -1,0 +1,236 @@
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f8fb;
+    color: #0f172a;
+    scroll-behavior: smooth;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+    position: fixed;
+    width: 100%;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 12px 40px; /* reduced from 80px */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    z-index: 1000;
+    box-sizing: border-box; /* prevents overflow */
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: #0072ff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Add icon-style logo */
+.logo::before {
+    content: "🛡️";
+    font-size: 24px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px; /* reduced gap */
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.nav-links a {
+    color: #0f172a;
+    text-decoration: none;
+    font-weight: 500;
+    position: relative;
+}
+
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #0072ff;
+    left: 0;
+    bottom: -5px;
+    transition: 0.3s;
+}
+
+.nav-links a:hover::after,
+.nav-links .active::after {
+    width: 100%;
+}
+
+.dashboard-btn {
+    background: linear-gradient(45deg, #00c6ff, #0072ff);
+    border: none;
+    padding: 6px 12px; /* slightly smaller */
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    white-space: nowrap; /* prevents breaking */
+}
+
+/* ===== HERO ===== */
+.hero {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* Cybersecurity background image */
+    background: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b') no-repeat center/cover;
+
+    text-align: center;
+    position: relative;
+}
+
+/* overlay for readability */
+.hero::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.85);
+    top: 0;
+    left: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero h1 {
+    font-size: 48px;
+    color: #0f172a;
+}
+
+.hero button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background: #0072ff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.hero button:hover {
+    background: #005edb;
+}
+
+/* ===== ABOUT ===== */
+.about {
+    padding: 100px 20px;
+    text-align: center;
+    background: #ffffff;
+}
+
+.cards {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 260px;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0,114,255,0.2);
+}
+
+/* ===== REPORT ===== */
+.report {
+    padding: 80px;
+    text-align: center;
+    background: #f4f8fb;
+}
+
+.report-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background: #0072ff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+/* ===== CTA ===== */
+.cta {
+    text-align: center;
+    padding: 80px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+}
+
+.cta button {
+    padding: 12px 25px;
+    background: white;
+    border: none;
+    color: #0072ff;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+/* ===== FOOTER ===== */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #0f172a;
+    color: white;
+}
+
+/* ===== MOBILE ===== */
+.menu-toggle {
+    display: none;
+    cursor: pointer;
+    font-size: 22px;
+}
+
+@media (max-width: 1024px) {
+    .navbar {
+        padding: 15px 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        background: white;
+        position: absolute;
+        right: 20px;
+        top: 60px;
+        width: 200px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        padding: 20px;
+    }
+
+    .nav-links.show {
+        display: flex;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+}
+

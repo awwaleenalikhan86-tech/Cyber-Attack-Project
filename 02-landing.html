@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>landing page</title>
+    <link rel="stylesheet" href="05-landing.css">
+</head>
+<body>
+    
+    
+    
+    
+    
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar">
+        <div class="logo">CyberShield</div>
+        
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#home" class="active">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#report">Report File</a></li>
+            <li><button onclick="openDashboard()" class="dashboard-btn">Dashboard</button></li>
+        </ul>
+        
+        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    </nav>
+    
+    <!-- ================= HERO ================= -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Protecting Systems from Cyber Threats</h1>
+            
+            <button onclick="openDashboard()">Get Started</button>
+            
+        </div>
+    </section>
+    
+    <!-- ================= ABOUT ================= -->
+    <section id="about" class="about">
+        <h2>About System</h2>
+        
+        <div class="cards">
+            <div class="card">
+                <h3>📡 Monitoring</h3>
+                <p>Track network traffic in real-time.</p>
+            </div>
+            
+            <div class="card">
+                <h3>🤖 ML Detection</h3>
+                <p>Detect cyber attacks using trained models.</p>
+            </div>
+            
+            <div class="card">
+                <h3>⚠️ Alerts</h3>
+                <p>Instant alerts for suspicious activities.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ================= REPORT ================= -->
+    <section id="report" class="report">
+        <h2>Project Report</h2>
+        <p>Download the complete report of the Cyber Attack Detection System.</p>
+        
+        <a href="https://d.docs.live.net/a736bfb7a57fae21/Documents/report%20cyber%20attack.pptx" class="report-btn" download>📄 Download Report</a>
+    </section>
+    
+    <!-- ================= DASHBOARD CTA ================= -->
+    <section class="cta">
+        <h2>Access Real-Time Dashboard</h2>
+        <button onclick="openDashboard()">Open Dashboard</button>
+    </section>
+    
+    
+    
+    
+    
+    
+    <footer>
+        
+        <p>© 2026 Cyber Attack Detection System | Developed by You</p>
+        
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html>

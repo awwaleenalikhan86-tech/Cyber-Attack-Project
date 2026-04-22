@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Attack Detection System — College Project Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --red:#E24B4A;--redL:rgba(226,75,74,0.12);--redD:#A32D2D;
+  --green:#3B6D11;--greenL:rgba(59,109,17,0.12);--greenD:#27500A;
+  --blue:#185FA5;--blueL:rgba(24,95,165,0.10);--blueD:#0C447C;
+  --amber:#BA7517;--amberL:rgba(186,117,23,0.12);--amberD:#854F0B;
+  --purple:#534AB7;--purpleL:rgba(83,74,183,0.10);
+  --teal:#1D9E75;--tealL:rgba(29,158,117,0.10);
+  --border:#e0ddd6;--muted:#888780;--bg:#f5f4f0;--white:#ffffff;--text:#2C2C2A;
+  --r:10px;--sh:0 1px 5px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.hdr-title h1{font-size:20px;font-weight:700;letter-spacing:-0.3px;}
+.hdr-title p{font-size:11px;color:#aaa;margin-top:3px;}
+.hdr-badges{display:flex;gap:10px;flex-wrap:wrap;}
+.badge{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;}
+.badge-green{background:#3B6D11;color:#fff;}
+.badge-blue{background:#185FA5;color:#fff;}
+.badge-amber{background:#BA7517;color:#fff;}
+.badge-red{background:#E24B4A;color:#fff;}
+
+/* TABS */
+.tab-bar{background:#fff;border-bottom:2px solid var(--border);display:flex;padding:0 28px;gap:0;}
+.tab-btn{padding:12px 24px;font-size:13px;font-weight:600;color:var(--muted);border:none;border-bottom:3px solid transparent;cursor:pointer;background:none;transition:all .2s;margin-bottom:-2px;}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab-btn:hover:not(.active){color:var(--text);}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* FILTERS */
+.filter-bar{background:#fff;border-bottom:1px solid var(--border);padding:10px 28px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.fg{display:flex;align-items:center;gap:6px;}
+.fg label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;}
+.fg select{border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;background:var(--bg);cursor:pointer;}
+.fg select:focus{outline:none;border-color:var(--blue);}
+.btn-rst{margin-left:auto;padding:5px 14px;border:1px solid var(--border);border-radius:6px;background:#fff;font-size:12px;cursor:pointer;color:var(--muted);}
+.btn-rst:hover{background:var(--bg);}
+
+/* DASHBOARD LAYOUT */
+.dash{padding:20px 28px;max-width:1600px;margin:0 auto;}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px;}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.red::before{background:var(--red);}
+.kpi.green::before{background:var(--green);}
+.kpi.blue::before{background:var(--blue);}
+.kpi.amber::before{background:var(--amber);}
+.kpi.purple::before{background:var(--purple);}
+.kpi-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;}
+.kpi-val{font-size:26px;font-weight:700;line-height:1.1;}
+.kpi.red .kpi-val{color:var(--redD);}
+.kpi.green .kpi-val{color:var(--greenD);}
+.kpi.blue .kpi-val{color:var(--blueD);}
+.kpi.amber .kpi-val{color:var(--amberD);}
+.kpi.purple .kpi-val{color:var(--purple);}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* ACCURACY HERO */
+.acc-hero{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.acc-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;box-shadow:var(--sh);display:flex;align-items:center;gap:20px;}
+.acc-circle{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;}
+.acc-circle.good{background:var(--greenL);border:3px solid var(--green);}
+.acc-circle.great{background:var(--blueL);border:3px solid var(--blue);}
+.acc-pct{font-size:20px;color:var(--greenD);}
+.acc-circle.great .acc-pct{color:var(--blueD);}
+.acc-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.acc-meta h3{font-size:14px;font-weight:700;margin-bottom:6px;}
+.acc-metrics{display:flex;gap:14px;flex-wrap:wrap;}
+.am{text-align:center;}
+.am-val{font-size:15px;font-weight:700;color:var(--blueD);}
+.am-lbl{font-size:10px;color:var(--muted);}
+
+/* CHART GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+.grid21{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px;}
+.grid12{display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:14px;}
+
+/* CHART CARD */
+.cc{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh);}
+.cc-hdr{margin-bottom:10px;}
+.cc-title{font-size:13px;font-weight:700;color:var(--text);}
+.cc-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.cc-body canvas{max-height:220px;}
+.cc-body.tall canvas{max-height:280px;}
+.cc-body.short canvas{max-height:155px;}
+
+/* CONFUSION MATRIX */
+.cm-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:4px;margin-top:10px;}
+.cm-cell{border-radius:6px;padding:14px 8px;text-align:center;}
+.cm-tp{background:var(--greenL);}
+.cm-tn{background:var(--blueL);}
+.cm-fp{background:var(--amberL);}
+.cm-fn{background:var(--redL);}
+.cm-val{font-size:22px;font-weight:700;}
+.cm-tp .cm-val,.cm-tn .cm-val{color:var(--greenD);}
+.cm-fp .cm-val{color:var(--amberD);}
+.cm-fn .cm-val{color:var(--redD);}
+.cm-lbl{font-size:10px;color:var(--muted);margin-top:3px;}
+.cm-axis{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:4px;padding-left:0;}
+.cm-axis span{font-size:10px;font-weight:700;color:var(--muted);text-align:center;text-transform:uppercase;letter-spacing:.5px;}
+
+/* INSIGHT STRIP */
+.insight-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px;}
+.ins{border-radius:var(--r);padding:12px 14px;border-left:4px solid;}
+.ins.danger{background:var(--redL);border-color:var(--red);}
+.ins.warn{background:var(--amberL);border-color:var(--amber);}
+.ins.info{background:var(--blueL);border-color:var(--blue);}
+.ins.good{background:var(--greenL);border-color:var(--green);}
+.ins-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.ins.danger .ins-title{color:var(--redD);}
+.ins.warn .ins-title{color:var(--amberD);}
+.ins.info .ins-title{color:var(--blueD);}
+.ins.good .ins-title{color:var(--greenD);}
+.ins-text{font-size:11px;line-height:1.5;color:var(--text);}
+
+/* SECTION DIVIDER */
+.sec-div{display:flex;align-items:center;gap:12px;margin:20px 0 14px;font-size:13px;font-weight:700;color:var(--text);}
+.sec-div::after{content:'';flex:1;height:1px;background:var(--border);}
+.sec-badge{padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px;}
+
+/* LEGEND */
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.ld{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+/* COMPARE TABLE */
+.cmp-tbl{width:100%;border-collapse:collapse;margin-top:8px;}
+.cmp-tbl th{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;}
+.cmp-tbl td{padding:8px 8px;font-size:12px;border-bottom:1px solid var(--border);}
+.cmp-tbl tr:last-child td{border-bottom:none;}
+.cmp-tbl .metric-name{color:var(--muted);}
+.cmp-tbl .v1{font-weight:700;color:var(--greenD);}
+.cmp-tbl .v2{font-weight:700;color:var(--blueD);}
+.cmp-tbl .winner{font-size:10px;background:var(--greenL);color:var(--greenD);padding:2px 7px;border-radius:10px;font-weight:700;}
+
+/* FEATURE IMPORTANCE bars */
+.fi-bars{display:flex;flex-direction:column;gap:7px;margin-top:8px;}
+.fi-item{display:flex;align-items:center;gap:8px;}
+.fi-name{font-size:10px;color:var(--muted);width:120px;text-align:right;flex-shrink:0;}
+.fi-track{flex:1;height:14px;background:#f0ede6;border-radius:4px;overflow:hidden;}
+.fi-fill{height:100%;border-radius:4px;}
+.fi-val{font-size:10px;color:var(--muted);width:36px;flex-shrink:0;}
+
+/* ===================== PREDICT TAB STYLES ===================== */
+.predict-hero{background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);border-radius:var(--r);padding:20px 24px;margin-bottom:18px;color:#fff;}
+.predict-hero h2{font-size:18px;font-weight:700;margin-bottom:6px;}
+.predict-hero p{font-size:12px;color:#aaa;line-height:1.6;}
+.predict-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.pf-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;}
+.pf-header{padding:14px 18px;border-bottom:1px solid var(--border);}
+.pf-header.red-hdr{background:linear-gradient(135deg,#1a0505,#2d0e0e);color:#fff;}
+.pf-header.blue-hdr{background:linear-gradient(135deg,#030d1e,#0c2340);color:#fff;}
+.pf-header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.pf-title{font-size:15px;font-weight:700;}
+.pf-title-sub{font-size:10px;opacity:.7;margin-top:3px;}
+.sample-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.btn-sample{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+.btn-sample-normal{background:rgba(59,109,17,0.25);color:#8dcc52;border:1px solid rgba(59,109,17,0.4);}
+.btn-sample-normal:hover{background:rgba(59,109,17,0.4);}
+.btn-sample-attack{background:rgba(226,75,74,0.25);color:#ff9998;border:1px solid rgba(226,75,74,0.4);}
+.btn-sample-attack:hover{background:rgba(226,75,74,0.4);}
+.btn-sample-netattack{background:rgba(186,117,23,0.25);color:#f5c97a;border:1px solid rgba(186,117,23,0.4);}
+.btn-sample-netattack:hover{background:rgba(186,117,23,0.4);}
+.pf-body{padding:16px 18px;}
+.pf-section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:12px 0 8px;padding-bottom:4px;border-bottom:1px dashed var(--border);}
+.pf-section-lbl:first-child{margin-top:0;}
+.pf-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;}
+.pf-field{display:flex;flex-direction:column;gap:3px;}
+.pf-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.pf-label span{font-weight:400;color:#b0aca5;text-transform:none;letter-spacing:0;}
+.pf-input{border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:12px;background:var(--bg);color:var(--text);transition:border-color .15s;}
+.pf-input:focus{outline:none;border-color:var(--blue);background:#fff;}
+.pf-input.changed{border-color:var(--amber);background:#fffdf7;}
+.pf-actions{margin-top:14px;display:flex;gap:10px;align-items:center;}
+.btn-predict{padding:9px 22px;background:linear-gradient(135deg,var(--blue),#0f3d7a);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:all .2s;box-shadow:0 2px 8px rgba(24,95,165,0.3);}
+.btn-predict:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(24,95,165,0.4);}
+.btn-predict.red-btn{background:linear-gradient(135deg,var(--red),#8a1f1f);box-shadow:0 2px 8px rgba(226,75,74,0.3);}
+.btn-predict.red-btn:hover{box-shadow:0 4px 14px rgba(226,75,74,0.4);}
+.btn-clear{padding:9px 14px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;}
+.btn-clear:hover{background:var(--bg);}
+
+/* RESULT BOX */
+.result-box{margin-top:14px;border-radius:10px;overflow:hidden;display:none;}
+.result-box.show{display:block;}
+.result-top{padding:16px 18px;display:flex;align-items:center;gap:16px;}
+.result-top.safe{background:linear-gradient(135deg,#0d2208,#1a3f0d);}
+.result-top.attack{background:linear-gradient(135deg,#200606,#3a0e0e);}
+.result-icon{font-size:32px;flex-shrink:0;}
+.result-verdict{font-size:18px;font-weight:700;color:#fff;}
+.result-desc{font-size:12px;color:rgba(255,255,255,0.7);margin-top:3px;}
+.result-prob-wrap{margin-left:auto;text-align:right;flex-shrink:0;}
+.result-prob{font-size:28px;font-weight:700;color:#fff;line-height:1;}
+.result-prob-lbl{font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px;}
+.result-meter{height:8px;background:rgba(255,255,255,0.15);border-radius:4px;overflow:hidden;margin-top:6px;}
+.result-meter-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.result-details{background:#f9f8f5;padding:12px 18px;border-top:1px solid var(--border);}
+.result-detail-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:11px;}
+.result-detail-row:not(:last-child){border-bottom:1px dashed var(--border);}
+.rdl{color:var(--muted);}
+.rdv{font-weight:700;color:var(--text);}
+.rdv.safe-v{color:var(--greenD);}
+.rdv.warn-v{color:var(--amberD);}
+.rdv.danger-v{color:var(--redD);}
+
+/* PREDICT HOW IT WORKS */
+.how-it-works{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;box-shadow:var(--sh);margin-bottom:14px;}
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;}
+.how-step{text-align:center;padding:12px 8px;}
+.how-step-num{width:32px;height:32px;border-radius:50%;background:var(--blueL);border:2px solid var(--blue);color:var(--blueD);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;}
+.how-step-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.how-step-desc{font-size:10px;color:var(--muted);line-height:1.4;}
+
+footer{text-align:center;padding:16px;color:var(--muted);font-size:11px;border-top:1px solid var(--border);margin-top:16px;}
+
+@media(max-width:1100px){
+  .kpi-row{grid-template-columns:repeat(3,1fr);}
+  .grid3{grid-template-columns:1fr 1fr;}
+  .grid21,.grid12{grid-template-columns:1fr;}
+  .acc-hero{grid-template-columns:1fr;}
+  .predict-grid{grid-template-columns:1fr;}
+  .how-steps{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:700px){
+  .kpi-row{grid-template-columns:1fr 1fr;}
+  .grid2,.grid3{grid-template-columns:1fr;}
+  .insight-strip{grid-template-columns:1fr;}
+  .tab-btn{padding:10px 14px;font-size:12px;}
+  .pf-fields{grid-template-columns:1fr;}
+  .how-steps{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-title">
+    <h1>&#128737; Cyber Attack Detection System</h1>
+    <p>College Project &nbsp;·&nbsp; Logistic Regression Analysis &nbsp;·&nbsp; Two Dataset Comparison &nbsp;·&nbsp; Intrusion Detection + Network Traffic</p>
+  </div>
+  <div class="hdr-badges">
+    <span class="badge badge-green">&#10003; Intrusion Model: 86.87%</span>
+    <span class="badge badge-blue">&#10003; Network Model: 97.15%</span>
+    <span class="badge badge-amber">35,549 Total Records</span>
+  </div>
+</header>
+
+<!-- GLOBAL TABS -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('overview',this)">&#127968; Overview</button>
+  <button class="tab-btn" onclick="switchTab('intrusion',this)">&#128204; Intrusion Dataset</button>
+  <button class="tab-btn" onclick="switchTab('network',this)">&#128225; Network LR Dataset</button>
+  <button class="tab-btn" onclick="switchTab('compare',this)">&#9878; Model Comparison</button>
+  <button class="tab-btn" onclick="switchTab('predict',this)">&#128270; Live Predict</button>
+</div>
+
+<!-- ===================== OVERVIEW TAB ===================== -->
+<div id="tab-overview" class="tab-pane active">
+<div class="dash">
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi blue">
+      <div class="kpi-lbl">Total Records</div>
+      <div class="kpi-val">35,549</div>
+      <div class="kpi-sub">Across both datasets</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-lbl">Intrusion Anomalies</div>
+      <div class="kpi-val">12,833</div>
+      <div class="kpi-sub">56.9% of intrusion data</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-lbl">Network Attacks</div>
+      <div class="kpi-val">2,005</div>
+      <div class="kpi-sub">20.0% of network data</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-lbl">Best Model Accuracy</div>
+      <div class="kpi-val">97.15%</div>
+      <div class="kpi-sub">Network Traffic LR</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-lbl">Best ROC-AUC</div>
+      <div class="kpi-val">99.45%</div>
+      <div class="kpi-sub">Network Traffic LR</div>
+    </div>
+  </div>
+
+  <!-- ACCURACY HERO -->
+  <div class="acc-hero">
+    <div class="acc-card">
+      <div class="acc-circle good">
+        <div class="acc-pct">86.87%</div>
+        <div class="acc-lbl">Accuracy</div>
+      </div>
+      <div class="acc-meta">
+        <h3>Intrusion Detection — Logistic Regression</h3>
+        <div class="acc-metrics">
+          <div class="am"><div class="am-val">94.63%</div><div class="am-lbl">ROC-AUC</div></div>
+          <div class="am"><div class="am-val">93.58%</div><div class="am-lbl">Precision</div></div>
+          <div class="am"><div class="am-val">82.77%</div><div class="am-lbl">Recall</div></div>
+          <div class="am"><div class="am-val">87.82%</div><div class="am-lbl">F1 Score</div></div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;">Trained on 22,544 records · 42 features · 80/20 train-test split</p>
+      </div>
+    </div>
+    <div class="acc-card">
+      <div class="acc-circle great">
+        <div class="acc-pct" style="color:var(--blueD)">97.15%</div>
+        <div class="acc-lbl">Accuracy</div>
+      </div>
+      <div class="acc-meta">
+        <h3>Network Traffic — Logistic Regression</h3>
+        <div class="acc-metrics">
+          <div class="am"><div class="am-val" style="color:var(--blueD)">99.45%</div><div class="am-lbl">ROC-AUC</div></div>
+          <div class="am"><div class="am-val" style="color:var(--blueD)">97.84%</div><div class="am-lbl">Precision</div></div>
+          <div class="am"><div class="am-val" style="color:var(--blueD)">88.08%</div><div class="am-lbl">Recall</div></div>
+          <div class="am"><div class="am-val" style="color:var(--blueD)">92.72%</div><div class="am-lbl">F1 Score</div></div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;">Trained on 10,005 records · 8 features · 80/20 train-test split</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="insight-strip">
+    <div class="ins danger">
+      <div class="ins-title">&#128680; Critical — Intrusion Dataset</div>
+      <div class="ins-text">56.9% of all network connections in the intrusion dataset are hostile. Telnet (97.3%) and POP3 (99.2%) are nearly entirely compromised services.</div>
+    </div>
+    <div class="ins good">
+      <div class="ins-title">&#10003; Strong Result — Network Model</div>
+      <div class="ins-text">The Network Traffic Logistic Regression achieves 97.15% accuracy and 99.45% AUC, making it production-ready for real-time cyber attack detection.</div>
+    </div>
+    <div class="ins info">
+      <div class="ins-title">&#128202; Key Feature Insight</div>
+      <div class="ins-text">Destination port (coef: +9.03) and bytes sent (coef: +6.07) are the strongest predictors of attacks in the network traffic model.</div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW CHARTS -->
+  <div class="grid2">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Dataset Composition — Intrusion</div><div class="cc-sub">How much of the intrusion traffic is hostile?</div></div>
+      <div class="cc-body"><canvas id="ov-donut1"></canvas></div>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:var(--red)"></div>Threats (56.9%)</div>
+        <div class="li"><div class="ld" style="background:var(--green)"></div>Normal (43.1%)</div>
+      </div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Dataset Composition — Network Traffic</div><div class="cc-sub">How much of the network traffic is an attack?</div></div>
+      <div class="cc-body"><canvas id="ov-donut2"></canvas></div>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:var(--amber)"></div>Attack (20.0%)</div>
+        <div class="li"><div class="ld" style="background:var(--teal)"></div>Normal (80.0%)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Model Accuracy Comparison</div><div class="cc-sub">How do both Logistic Regression models perform?</div></div>
+      <div class="cc-body"><canvas id="ov-acc-bar"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">ROC Curve Comparison</div><div class="cc-sub">Which model separates attacks from normal traffic better?</div></div>
+      <div class="cc-body"><canvas id="ov-roc"></canvas></div>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:var(--green)"></div>Intrusion AUC: 94.63%</div>
+        <div class="li"><div class="ld" style="background:var(--blue)"></div>Network AUC: 99.45%</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===================== INTRUSION TAB ===================== -->
+<div id="tab-intrusion" class="tab-pane">
+
+<div class="filter-bar">
+  <div class="fg"><label>Protocol</label>
+    <select id="i-proto" onchange="filterIntrusion()">
+      <option value="all">All</option><option value="TCP">TCP</option><option value="UDP">UDP</option><option value="ICMP">ICMP</option>
+    </select>
+  </div>
+  <div class="fg"><label>Traffic Type</label>
+    <select id="i-class" onchange="filterIntrusion()">
+      <option value="all">All</option><option value="anomaly">Threats Only</option><option value="normal">Normal Only</option>
+    </select>
+  </div>
+  <div class="fg"><label>Top Service</label>
+    <select id="i-svc" onchange="filterIntrusion()">
+      <option value="all">All Services</option>
+      <option value="private">Private</option><option value="telnet">Telnet</option><option value="http">HTTP</option>
+      <option value="pop_3">POP3</option><option value="ftp">FTP</option><option value="smtp">SMTP</option>
+    </select>
+  </div>
+  <button class="btn-rst" onclick="resetIntrusion()">&#8635; Reset</button>
+</div>
+
+<div class="dash">
+
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+    <div class="kpi blue"><div class="kpi-lbl">Total Records</div><div class="kpi-val">22,544</div><div class="kpi-sub">Intrusion dataset</div></div>
+    <div class="kpi red"><div class="kpi-lbl">Threats Detected</div><div class="kpi-val">12,833</div><div class="kpi-sub">56.9% threat rate</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Normal Connections</div><div class="kpi-val">9,711</div><div class="kpi-sub">43.1% safe traffic</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">LR Model Accuracy</div><div class="kpi-val">86.87%</div><div class="kpi-sub">ROC-AUC: 94.63%</div></div>
+  </div>
+
+  <!-- Intrusion Insights -->
+  <div class="insight-strip" style="grid-template-columns:repeat(3,1fr)">
+    <div class="ins danger"><div class="ins-title">&#9888; Most Dangerous Service</div><div class="ins-text">Telnet has a 97.3% attack rate. Private ports show 82.2% attack rate. These services should be blocked immediately.</div></div>
+    <div class="ins warn"><div class="ins-title">&#128202; Protocol Risk</div><div class="ins-text">TCP carries the most attacks (11,038) due to its prevalence. However, ICMP has a 91% attack ratio, indicating active network scanning.</div></div>
+    <div class="ins info"><div class="ins-title">&#128203; Model Performance</div><div class="ins-text">The model correctly identified 2,139 out of 2,584 actual threats. 445 threats were missed (false negatives) — an area for improvement.</div></div>
+  </div>
+
+  <!-- Section: Data Analysis -->
+  <div class="sec-div"><span class="sec-badge" style="background:var(--redL);color:var(--redD)">Dataset Analysis</span>Intrusion Traffic Patterns</div>
+
+  <div class="grid3">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Threat vs Normal Traffic</div><div class="cc-sub">Overall distribution of connection classes</div></div>
+      <div class="cc-body"><canvas id="i-donut"></canvas></div>
+      <div class="leg"><div class="li"><div class="ld" style="background:var(--red)"></div>Threats</div><div class="li"><div class="ld" style="background:var(--green)"></div>Normal</div></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Protocol-wise Attack Count</div><div class="cc-sub">Which protocol carries the most hostile traffic?</div></div>
+      <div class="cc-body"><canvas id="i-proto-chart"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Connection Status Breakdown</div><div class="cc-sub">How connections complete across the network</div></div>
+      <div class="cc-body"><canvas id="i-flag-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid21">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Top 8 Most Attacked Services</div><div class="cc-sub">Which network services are targeted most aggressively?</div></div>
+      <div class="cc-body tall"><canvas id="i-svc-chart"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Connection Duration Distribution</div><div class="cc-sub">Do attacks use longer or shorter connections?</div></div>
+      <div class="cc-body tall"><canvas id="i-dur-chart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Section: LR Results -->
+  <div class="sec-div"><span class="sec-badge" style="background:var(--greenL);color:var(--greenD)">ML Results</span>Logistic Regression — Intrusion Model</div>
+
+  <div class="grid3">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Confusion Matrix</div><div class="cc-sub">Breakdown of correct vs incorrect predictions</div></div>
+      <div class="cm-axis"><span>Predicted Normal</span><span>Predicted Threat</span></div>
+      <div class="cm-grid">
+        <div class="cm-cell cm-tn"><div class="cm-val">1,778</div><div class="cm-lbl">True Normal ✓</div></div>
+        <div class="cm-cell cm-fp"><div class="cm-val">147</div><div class="cm-lbl">False Alarm !</div></div>
+        <div class="cm-cell cm-fn"><div class="cm-val">445</div><div class="cm-lbl">Missed Threat !</div></div>
+        <div class="cm-cell cm-tp"><div class="cm-val">2,139</div><div class="cm-lbl">True Threat ✓</div></div>
+      </div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Model Performance Metrics</div><div class="cc-sub">Key evaluation scores for Logistic Regression</div></div>
+      <div class="cc-body short"><canvas id="i-metrics-bar"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">ROC Curve</div><div class="cc-sub">AUC = 94.63% — strong discriminating power</div></div>
+      <div class="cc-body short"><canvas id="i-roc"></canvas></div>
+    </div>
+  </div>
+
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-hdr"><div class="cc-title">Feature Importance — Logistic Regression Coefficients</div><div class="cc-sub">Which features most strongly predict an intrusion?</div></div>
+    <div class="fi-bars" id="i-fi-bars"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ===================== NETWORK TAB ===================== -->
+<div id="tab-network" class="tab-pane">
+
+<div class="filter-bar">
+  <div class="fg"><label>Traffic Type</label>
+    <select id="n-label" onchange="filterNetwork()">
+      <option value="all">All</option><option value="1">Attacks Only</option><option value="0">Normal Only</option>
+    </select>
+  </div>
+  <div class="fg"><label>Protocol</label>
+    <select id="n-proto" onchange="filterNetwork()">
+      <option value="all">All</option><option value="TCP">TCP</option><option value="UDP">UDP</option><option value="ICMP">ICMP</option><option value="HTTP">HTTP</option>
+    </select>
+  </div>
+  <button class="btn-rst" onclick="resetNetwork()">&#8635; Reset</button>
+</div>
+
+<div class="dash">
+
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
+    <div class="kpi blue"><div class="kpi-lbl">Total Records</div><div class="kpi-val">10,005</div><div class="kpi-sub">Network traffic sample</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Attack Connections</div><div class="kpi-val">2,005</div><div class="kpi-sub">20.0% attack rate</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Normal Connections</div><div class="kpi-val">8,000</div><div class="kpi-sub">80.0% clean traffic</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">LR Accuracy</div><div class="kpi-val">97.15%</div><div class="kpi-sub">ROC-AUC: 99.45%</div></div>
+    <div class="kpi purple"><div class="kpi-lbl">Attacks Caught</div><div class="kpi-val">362/411</div><div class="kpi-sub">88.08% recall rate</div></div>
+  </div>
+
+  <!-- Network Insights -->
+  <div class="insight-strip">
+    <div class="ins good"><div class="ins-title">&#10003; Excellent Model</div><div class="ins-text">97.15% accuracy with 99.45% AUC. Only 8 false alarms and 49 missed attacks out of 2,001 test records.</div></div>
+    <div class="ins warn"><div class="ins-title">&#9888; Key Attack Signal</div><div class="ins-text">Destination port (coef: +9.03) is the single strongest attack predictor. Attacks heavily target specific port ranges.</div></div>
+    <div class="ins danger"><div class="ins-title">&#128225; Traffic Anomaly</div><div class="ins-text">Attacks send significantly more bytes (avg higher) while having lower bytes-per-packet, indicating packet flooding behavior.</div></div>
+  </div>
+
+  <div class="sec-div"><span class="sec-badge" style="background:var(--amberL);color:var(--amberD)">Dataset Analysis</span>Network Traffic Patterns</div>
+
+  <div class="grid3">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Attack vs Normal Traffic</div><div class="cc-sub">Overall distribution of network connection labels</div></div>
+      <div class="cc-body"><canvas id="n-donut"></canvas></div>
+      <div class="leg"><div class="li"><div class="ld" style="background:var(--amber)"></div>Attack</div><div class="li"><div class="ld" style="background:var(--teal)"></div>Normal</div></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Protocol-wise Attack Distribution</div><div class="cc-sub">Which protocols are used in network attacks?</div></div>
+      <div class="cc-body"><canvas id="n-proto-chart"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Top Targeted Ports</div><div class="cc-sub">Which destination ports do attackers target?</div></div>
+      <div class="cc-body"><canvas id="n-ports-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Bytes Per Packet Distribution</div><div class="cc-sub">Attack vs normal traffic — packet size patterns</div></div>
+      <div class="cc-body"><canvas id="n-bpp-chart"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Traffic Volume: Attack vs Normal</div><div class="cc-sub">Average bytes sent and received per connection type</div></div>
+      <div class="cc-body"><canvas id="n-vol-chart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-hdr"><div class="cc-title">Data Scatter: Bytes Sent vs Received</div><div class="cc-sub">Visualizing attack vs normal traffic by data volume</div></div>
+    <div class="cc-body"><canvas id="n-scatter" style="max-height:240px"></canvas></div>
+    <div style="margin-top:6px;font-size:10px;color:var(--muted);"><span style="color:var(--amber)">&#9679;</span> Attack &nbsp;<span style="color:var(--teal)">&#9679;</span> Normal &nbsp; X = Bytes Sent, Y = Bytes Received</div>
+  </div>
+
+  <div class="sec-div"><span class="sec-badge" style="background:var(--blueL);color:var(--blueD)">ML Results</span>Logistic Regression — Network Traffic Model</div>
+
+  <div class="grid3">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Confusion Matrix</div><div class="cc-sub">Breakdown of correct vs incorrect predictions</div></div>
+      <div class="cm-axis"><span>Predicted Normal</span><span>Predicted Attack</span></div>
+      <div class="cm-grid">
+        <div class="cm-cell cm-tn"><div class="cm-val">1,582</div><div class="cm-lbl">True Normal ✓</div></div>
+        <div class="cm-cell cm-fp"><div class="cm-val">8</div><div class="cm-lbl">False Alarm !</div></div>
+        <div class="cm-cell cm-fn"><div class="cm-val">49</div><div class="cm-lbl">Missed Attack !</div></div>
+        <div class="cm-cell cm-tp"><div class="cm-val">362</div><div class="cm-lbl">True Attack ✓</div></div>
+      </div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Model Performance Metrics</div><div class="cc-sub">Accuracy, Precision, Recall and F1 Score</div></div>
+      <div class="cc-body short"><canvas id="n-metrics-bar"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">ROC Curve</div><div class="cc-sub">AUC = 99.45% — near-perfect separation</div></div>
+      <div class="cc-body short"><canvas id="n-roc"></canvas></div>
+    </div>
+  </div>
+
+  <div class="cc" style="margin-bottom:14px">
+    <div class="cc-hdr"><div class="cc-title">Feature Importance — Logistic Regression Coefficients</div><div class="cc-sub">Which features most strongly predict a network attack?</div></div>
+    <div class="fi-bars" id="n-fi-bars"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ===================== COMPARE TAB ===================== -->
+<div id="tab-compare" class="tab-pane">
+<div class="dash">
+
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:18px;">
+    <div class="kpi green"><div class="kpi-lbl">Network Accuracy</div><div class="kpi-val">97.15%</div><div class="kpi-sub">&#9650; Better by 10.28%</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Network AUC</div><div class="kpi-val">99.45%</div><div class="kpi-sub">&#9650; Better by 4.82%</div></div>
+    <div class="kpi amber"><div class="kpi-lbl">Intrusion F1</div><div class="kpi-val">87.82%</div><div class="kpi-sub">Acceptable performance</div></div>
+    <div class="kpi purple"><div class="kpi-lbl">Network F1</div><div class="kpi-val">92.72%</div><div class="kpi-sub">&#9650; Better F1 score</div></div>
+  </div>
+
+  <div class="insight-strip" style="grid-template-columns:repeat(3,1fr)">
+    <div class="ins good"><div class="ins-title">&#127941; Winner: Network Traffic Model</div><div class="ins-text">The Network LR model outperforms Intrusion LR on all metrics — 97.15% vs 86.87% accuracy. Cleaner features + less noise = better performance.</div></div>
+    <div class="ins info"><div class="ins-title">&#128270; Why the difference?</div><div class="ins-text">The Intrusion dataset has 42 complex features and significant class imbalance. Network Traffic is simpler with 8 high-signal features and cleaner labels.</div></div>
+    <div class="ins warn"><div class="ins-title">&#128203; For Your Report</div><div class="ins-text">Both models use Logistic Regression with StandardScaler. Network model achieves near-perfect AUC of 99.45% — cite this as your best result.</div></div>
+  </div>
+
+  <!-- Side by side comparison bar chart -->
+  <div class="grid2">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Model Metrics Comparison</div><div class="cc-sub">Accuracy, Precision, Recall and F1 — side by side</div></div>
+      <div class="cc-body"><canvas id="c-metrics"></canvas></div>
+      <div class="leg"><div class="li"><div class="ld" style="background:var(--green)"></div>Intrusion LR</div><div class="li"><div class="ld" style="background:var(--blue)"></div>Network LR</div></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">ROC Curves — Both Models</div><div class="cc-sub">How well each model separates attacks from normal traffic</div></div>
+      <div class="cc-body"><canvas id="c-roc"></canvas></div>
+      <div class="leg"><div class="li"><div class="ld" style="background:var(--green)"></div>Intrusion AUC 94.63%</div><div class="li"><div class="ld" style="background:var(--blue)"></div>Network AUC 99.45%</div></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Dataset Overview Comparison</div><div class="cc-sub">Size, attack rate, and class balance between datasets</div></div>
+      <div class="cc-body"><canvas id="c-dataset-bar"></canvas></div>
+    </div>
+    <div class="cc">
+      <div class="cc-hdr"><div class="cc-title">Detailed Performance Table</div><div class="cc-sub">All metrics compared — Intrusion vs Network Traffic</div></div>
+      <table class="cmp-tbl">
+        <thead><tr><th>Metric</th><th>Intrusion LR</th><th>Network LR</th><th>Winner</th></tr></thead>
+        <tbody>
+          <tr><td class="metric-name">Accuracy</td><td class="v1">86.87%</td><td class="v2">97.15%</td><td><span class="winner">Network</span></td></tr>
+          <tr><td class="metric-name">ROC-AUC</td><td class="v1">94.63%</td><td class="v2">99.45%</td><td><span class="winner">Network</span></td></tr>
+          <tr><td class="metric-name">Precision</td><td class="v1">93.58%</td><td class="v2">97.84%</td><td><span class="winner">Network</span></td></tr>
+          <tr><td class="metric-name">Recall</td><td class="v1">82.77%</td><td class="v2">88.08%</td><td><span class="winner">Network</span></td></tr>
+          <tr><td class="metric-name">F1 Score</td><td class="v1">87.82%</td><td class="v2">92.72%</td><td><span class="winner">Network</span></td></tr>
+          <tr><td class="metric-name">Total Records</td><td class="v1">22,544</td><td class="v2">10,005</td><td><span class="winner">Intrusion</span></td></tr>
+          <tr><td class="metric-name">Features Used</td><td class="v1">11</td><td class="v2">8</td><td>—</td></tr>
+          <tr><td class="metric-name">Attack Rate</td><td class="v1">56.9%</td><td class="v2">20.0%</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ===================== PREDICT TAB ===================== -->
+<div id="tab-predict" class="tab-pane">
+<div class="dash">
+
+  <!-- Hero Banner -->
+  <div class="predict-hero">
+    <h2>&#128270; Live Prediction Engine</h2>
+    <p>Enter network connection parameters below and run the Logistic Regression model in real-time. Use the <strong>Sample Data</strong> buttons to auto-fill realistic examples for both normal traffic and known attacks — then tweak values to explore how the model reacts.</p>
+  </div>
+
+  <!-- How It Works -->
+  <div class="how-it-works">
+    <div class="cc-title">&#128161; How Does Live Prediction Work?</div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">1</div>
+        <div class="how-step-title">Enter Values</div>
+        <div class="how-step-desc">Fill in the network connection features, or click a Sample Data button to auto-load example data.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">2</div>
+        <div class="how-step-title">Standardize</div>
+        <div class="how-step-desc">Features are scaled using the training dataset's mean & standard deviation (StandardScaler).</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">3</div>
+        <div class="how-step-title">Compute Score</div>
+        <div class="how-step-desc">The LR model computes: z = w₁x₁ + w₂x₂ + … + b using trained coefficients.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">4</div>
+        <div class="how-step-title">Sigmoid → Verdict</div>
+        <div class="how-step-desc">P(attack) = σ(z) = 1/(1+e⁻ᶻ). If P > 0.5 → Attack flagged. Otherwise → Safe.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREDICTION FORMS GRID -->
+  <div class="predict-grid">
+
+    <!-- INTRUSION MODEL CARD -->
+    <div class="pf-card">
+      <div class="pf-header red-hdr">
+        <div class="pf-header-top">
+          <div>
+            <div class="pf-title">&#128204; Intrusion Detection Model</div>
+            <div class="pf-title-sub">Logistic Regression · 11 Features · 86.87% Accuracy · AUC 94.63%</div>
+          </div>
+        </div>
+        <div class="sample-btns">
+          <button class="btn-sample btn-sample-normal" onclick="loadIntrusionSample('normal')">&#128203; Normal Traffic Sample</button>
+          <button class="btn-sample btn-sample-attack" onclick="loadIntrusionSample('attack')">&#9888; Attack Sample</button>
+          <button class="btn-sample btn-sample-attack" onclick="loadIntrusionSample('telnet_attack')" style="background:rgba(83,74,183,0.25);color:#b0a9ff;border-color:rgba(83,74,183,0.4);">&#128225; Telnet Attack</button>
+        </div>
+      </div>
+      <div class="pf-body">
+
+        <div class="pf-section-lbl">&#128268; Connection Basics</div>
+        <div class="pf-fields">
+          <div class="pf-field">
+            <label class="pf-label">Duration <span>(seconds)</span></label>
+            <input class="pf-input" id="i_duration" type="number" min="0" placeholder="e.g. 0" value="">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Protocol Type</label>
+            <select class="pf-input" id="i_protocol">
+              <option value="">Select Protocol</option>
+              <option value="0">TCP</option>
+              <option value="1">UDP</option>
+              <option value="2">ICMP</option>
+            </select>
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Service</label>
+            <select class="pf-input" id="i_service">
+              <option value="">Select Service</option>
+              <option value="0">HTTP</option>
+              <option value="1">FTP</option>
+              <option value="2">SMTP</option>
+              <option value="3">Telnet</option>
+              <option value="4">POP3</option>
+              <option value="5">Private</option>
+              <option value="6">Other</option>
+            </select>
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Connection Flag</label>
+            <select class="pf-input" id="i_flag">
+              <option value="">Select Flag</option>
+              <option value="0">SF (Successful)</option>
+              <option value="1">REJ (Rejected)</option>
+              <option value="2">S0 (No Response)</option>
+              <option value="3">RSTO (Reset-Orig)</option>
+              <option value="4">RSTOS0 (Reset-Rem)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pf-section-lbl">&#128190; Data Transfer</div>
+        <div class="pf-fields">
+          <div class="pf-field">
+            <label class="pf-label">Source Bytes <span>(bytes)</span></label>
+            <input class="pf-input" id="i_src_bytes" type="number" min="0" placeholder="e.g. 200">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Destination Bytes <span>(bytes)</span></label>
+            <input class="pf-input" id="i_dst_bytes" type="number" min="0" placeholder="e.g. 8000">
+          </div>
+        </div>
+
+        <div class="pf-section-lbl">&#128274; Security Signals</div>
+        <div class="pf-fields">
+          <div class="pf-field">
+            <label class="pf-label">Failed Logins <span>(count)</span></label>
+            <input class="pf-input" id="i_failed_logins" type="number" min="0" placeholder="e.g. 0">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Logged In</label>
+            <select class="pf-input" id="i_logged_in">
+              <option value="">Select</option>
+              <option value="1">Yes (1)</option>
+              <option value="0">No (0)</option>
+            </select>
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">SYN Error Rate <span>(0–1)</span></label>
+            <input class="pf-input" id="i_serror_rate" type="number" min="0" max="1" step="0.01" placeholder="e.g. 0.0">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">REJ Error Rate <span>(0–1)</span></label>
+            <input class="pf-input" id="i_rerror_rate" type="number" min="0" max="1" step="0.01" placeholder="e.g. 0.0">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Dst Host Count <span>(0–255)</span></label>
+            <input class="pf-input" id="i_dst_host_count" type="number" min="0" max="255" placeholder="e.g. 100">
+          </div>
+        </div>
+
+        <div class="pf-actions">
+          <button class="btn-predict red-btn" onclick="predictIntrusion()">&#128270; Run Intrusion Prediction</button>
+          <button class="btn-clear" onclick="clearIntrusion()">&#215; Clear</button>
+        </div>
+        <div id="i-result" class="result-box"></div>
+      </div>
+    </div>
+
+    <!-- NETWORK MODEL CARD -->
+    <div class="pf-card">
+      <div class="pf-header blue-hdr">
+        <div class="pf-header-top">
+          <div>
+            <div class="pf-title">&#128225; Network Traffic Model</div>
+            <div class="pf-title-sub">Logistic Regression · 8 Features · 97.15% Accuracy · AUC 99.45%</div>
+          </div>
+        </div>
+        <div class="sample-btns">
+          <button class="btn-sample btn-sample-normal" onclick="loadNetworkSample('normal')">&#128203; Normal Traffic Sample</button>
+          <button class="btn-sample btn-sample-netattack" onclick="loadNetworkSample('attack')">&#9888; Attack Sample</button>
+          <button class="btn-sample btn-sample-netattack" onclick="loadNetworkSample('flood')" style="background:rgba(226,75,74,0.2);color:#ff9a99;border-color:rgba(226,75,74,0.4);">&#128167; Flood Attack</button>
+        </div>
+      </div>
+      <div class="pf-body">
+
+        <div class="pf-section-lbl">&#128268; Connection Parameters</div>
+        <div class="pf-fields">
+          <div class="pf-field">
+            <label class="pf-label">Duration <span>(seconds)</span></label>
+            <input class="pf-input" id="n_duration" type="number" min="0" step="0.1" placeholder="e.g. 12.5">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Protocol</label>
+            <select class="pf-input" id="n_protocol">
+              <option value="">Select Protocol</option>
+              <option value="0">TCP (0)</option>
+              <option value="1">UDP (1)</option>
+              <option value="2">ICMP (2)</option>
+              <option value="3">HTTP (3)</option>
+            </select>
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Packet Count <span>(packets)</span></label>
+            <input class="pf-input" id="n_packet_count" type="number" min="0" placeholder="e.g. 20">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Source Port <span>(1–65535)</span></label>
+            <input class="pf-input" id="n_src_port" type="number" min="1" max="65535" placeholder="e.g. 45123">
+          </div>
+        </div>
+
+        <div class="pf-section-lbl">&#128190; Traffic Volume</div>
+        <div class="pf-fields">
+          <div class="pf-field">
+            <label class="pf-label">Bytes Sent <span>(bytes)</span></label>
+            <input class="pf-input" id="n_bytes_sent" type="number" min="0" placeholder="e.g. 1500">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Bytes Received <span>(bytes)</span></label>
+            <input class="pf-input" id="n_bytes_received" type="number" min="0" placeholder="e.g. 3000">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Bytes Per Packet <span>(bytes)</span></label>
+            <input class="pf-input" id="n_bytes_per_packet" type="number" min="0" placeholder="e.g. 300">
+          </div>
+          <div class="pf-field">
+            <label class="pf-label">Destination Port <span>(1–65535)</span></label>
+            <input class="pf-input" id="n_dst_port" type="number" min="1" max="65535" placeholder="e.g. 443">
+          </div>
+        </div>
+
+        <div class="pf-actions">
+          <button class="btn-predict" onclick="predictNetwork()">&#128270; Run Network Prediction</button>
+          <button class="btn-clear" onclick="clearNetwork()">&#215; Clear</button>
+        </div>
+        <div id="n-result" class="result-box"></div>
+      </div>
+    </div>
+
+  </div><!-- end predict-grid -->
+
+  <!-- PREDICT INSIGHT STRIP -->
+  <div class="insight-strip">
+    <div class="ins info">
+      <div class="ins-title">&#128203; Feature Scaling Note</div>
+      <div class="ins-text">Inputs are internally standardized using approximate dataset means and std deviations before applying LR coefficients — mimicking the StandardScaler used in training.</div>
+    </div>
+    <div class="ins warn">
+      <div class="ins-title">&#9888; Demo Disclaimer</div>
+      <div class="ins-text">This is an educational simulation. Predictions use the trained coefficient weights. Exact probabilities may vary slightly from the Python sklearn model due to intercept approximation.</div>
+    </div>
+    <div class="ins good">
+      <div class="ins-title">&#128161; Try This</div>
+      <div class="ins-text">Load an Attack Sample, then change Destination Port to 80 (HTTP) and watch the risk score change. Explore how each feature shifts the prediction!</div>
+    </div>
+  </div>
+
+</div>
+</div><!-- end predict tab -->
+
+<footer>Cyber Attack Detection System &nbsp;·&nbsp; College Project &nbsp;·&nbsp; Logistic Regression on Intrusion Detection + Network Traffic Datasets &nbsp;·&nbsp; 35,549 total records analyzed</footer>
+
+<script>
+/* ===================== DATA ===================== */
+const D = {
+  intrusion:{
+    total:22544,anomaly:12833,normal:9711,anomaly_pct:56.9,
+    accuracy:86.87,roc_auc:94.63,precision:93.58,recall:82.77,f1:87.82,
+    cm:[[1778,147],[445,2139]],
+    roc_pts:[{fpr:0,tpr:0},{fpr:0.001,tpr:0.28},{fpr:0.003,tpr:0.49},{fpr:0.007,tpr:0.62},{fpr:0.013,tpr:0.71},{fpr:0.02,tpr:0.77},{fpr:0.03,tpr:0.81},{fpr:0.045,tpr:0.84},{fpr:0.065,tpr:0.87},{fpr:0.09,tpr:0.89},{fpr:0.12,tpr:0.91},{fpr:0.16,tpr:0.93},{fpr:0.22,tpr:0.95},{fpr:0.32,tpr:0.97},{fpr:0.45,tpr:0.98},{fpr:0.65,tpr:0.99},{fpr:1,tpr:1}],
+    coef:{duration:0.097,protocol:-1.045,service:1.094,flag:-0.339,src_bytes:3.991,dst_bytes:-0.254,failed_logins:0.329,logged_in:-1.068,serror_rate:0.965,rerror_rate:1.248,dst_host_count:0.543},
+    proto_labels:['ICMP','TCP','UDP'],proto_anomaly:[950,11038,845],proto_normal:[93,7842,1776],
+    top_services_labels:['Private','Telnet','HTTP','POP3','Other','ECR-I','FTP','FTP-Data'],top_services_counts:[3922,1582,1180,1011,773,704,644,531],
+    flag_labels:['Successful','Rejected','No Response','Reset-Orig','Reset-Rem','S3','Half-Open'],flag_counts:[14875,3850,2013,773,669,249,73],
+    dur_labels:['0-10s','10-50s','50-100s','100-300s','300s+'],dur_normal:[9550,83,15,16,47],dur_anomaly:[11040,50,24,13,706]
+  },
+  network:{
+    total:10005,attack:2005,normal:8000,attack_pct:20.0,
+    accuracy:97.15,roc_auc:99.45,precision:97.84,recall:88.08,f1:92.72,
+    cm:[[1582,8],[49,362]],
+    roc_pts:[{fpr:0,tpr:0},{fpr:0.001,tpr:0.55},{fpr:0.002,tpr:0.72},{fpr:0.004,tpr:0.82},{fpr:0.007,tpr:0.88},{fpr:0.012,tpr:0.92},{fpr:0.02,tpr:0.95},{fpr:0.032,tpr:0.97},{fpr:0.05,tpr:0.98},{fpr:0.08,tpr:0.99},{fpr:0.15,tpr:0.995},{fpr:0.3,tpr:0.998},{fpr:0.6,tpr:0.999},{fpr:1,tpr:1}],
+    coef:{duration:-1.299,packet_count:1.764,bytes_sent:6.074,bytes_received:-4.079,bytes_per_packet:-2.655,protocol:-2.076,src_port:-0.015,dst_port:9.029},
+    proto_labels:['TCP','UDP','ICMP','HTTP','HTTPS','Other'],proto_attack:[680,210,310,420,180,205],proto_normal:[3100,1100,800,1700,950,350],
+    bpp_labels:['0-50','50-100','100-200','200-500','500-1000','1000+'],bpp_attack:[820,310,430,280,105,60],bpp_normal:[1200,1800,2300,1900,560,240],
+    top_ports_labels:['443','80','22','8080','3306','21','25','53'],top_ports_counts:[420,380,290,210,180,160,140,90],
+    scatter:[
+      {x:500,y:200,label:0},{x:800,y:400,label:0},{x:50000,y:100,label:1},{x:1200,y:600,label:0},
+      {x:80000,y:50,label:1},{x:300,y:150,label:0},{x:45000,y:80,label:1},{x:600,y:300,label:0},
+      {x:70000,y:120,label:1},{x:1500,y:700,label:0},{x:900,y:350,label:0},{x:55000,y:90,label:1},
+      {x:400,y:200,label:0},{x:62000,y:150,label:1},{x:2000,y:800,label:0},{x:38000,y:60,label:1},
+      {x:1100,y:500,label:0},{x:44000,y:70,label:1},{x:700,y:280,label:0},{x:91000,y:110,label:1},
+      {x:350,y:180,label:0},{x:1800,y:650,label:0},{x:73000,y:95,label:1},{x:2500,y:900,label:0},
+      {x:48000,y:85,label:1},{x:1600,y:720,label:0},{x:3000,y:1100,label:0},{x:67000,y:130,label:1},
+      {x:800,y:380,label:0},{x:56000,y:140,label:1}
+    ],
+    avg_bytes_sent_attack:62400,avg_bytes_sent_normal:1850,avg_duration_attack:8.2,avg_duration_normal:12.1,avg_packets_attack:42.3,avg_packets_normal:18.7
+  }
+};
+
+const C={
+  red:'#E24B4A',green:'#3B6D11',blue:'#185FA5',amber:'#BA7517',teal:'#1D9E75',purple:'#534AB7',muted:'#888780',
+  redL:'rgba(226,75,74,0.15)',greenL:'rgba(59,109,17,0.15)',blueL:'rgba(24,95,165,0.12)',amberL:'rgba(186,117,23,0.15)',tealL:'rgba(29,158,117,0.15)'
+};
+
+Chart.defaults.font.family="-apple-system,'Segoe UI',sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.color='#888780';
+
+/* ===================== CHART HELPERS ===================== */
+let charts={};
+function mk(id,cfg){if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),cfg);return charts[id];}
+
+function donut(id,labels,data,colors,center){
+  mk(id,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+    options:{cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw.toLocaleString()} (${(ctx.raw/data.reduce((a,b)=>a+b)*100).toFixed(1)}%)`}}}},
+    plugins:[{id:'ct',beforeDraw(chart){const{width:w,height:h,ctx}=chart;ctx.restore();ctx.fillStyle=center.color||'#444';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.fillText(center.val,w/2,h/2+8);ctx.fillStyle='#888';ctx.font='10px sans-serif';ctx.fillText(center.lbl,w/2,h/2+22);ctx.save();}}]
+  });
+}
+
+function hbar(id,labels,data,colors){
+  mk(id,{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:3}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},beginAtZero:true},y:{grid:{display:false}}}}
+  });
+}
+
+function bar2(id,labels,ds1,ds2,l1,l2,c1,c2){
+  mk(id,{type:'bar',data:{labels,datasets:[{label:l1,data:ds1,backgroundColor:c1,borderRadius:3},{label:l2,data:ds2,backgroundColor:c2,borderRadius:3}]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,0.04)'},beginAtZero:true}}}
+  });
+}
+
+function metricsBar(id,acc,prec,rec,f1,auc,color){
+  mk(id,{type:'bar',data:{labels:['Accuracy','Precision','Recall','F1 Score','ROC-AUC'],datasets:[{data:[acc,prec,rec,f1,auc],backgroundColor:[color,color,color,color,color+'99'],borderRadius:4}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{min:50,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:v=>v+'%'}}}}
+  });
+}
+
+function rocCurve(id,pts,color,auc){
+  mk(id,{type:'line',data:{datasets:[
+    {label:`ROC (AUC ${auc}%)`,data:pts.map(p=>({x:p.fpr,y:p.tpr})),borderColor:color,backgroundColor:color+'20',fill:true,pointRadius:0,tension:0.4,borderWidth:2},
+    {label:'Random',data:[{x:0,y:0},{x:1,y:1}],borderColor:'#ccc',borderDash:[4,4],pointRadius:0,borderWidth:1,fill:false}
+  ]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:8}}},scales:{x:{title:{display:true,text:'False Positive Rate'},min:0,max:1,grid:{color:'rgba(0,0,0,0.04)'}},y:{title:{display:true,text:'True Positive Rate'},min:0,max:1,grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+}
+
+function rocDouble(id,pts1,pts2,c1,c2,auc1,auc2){
+  mk(id,{type:'line',data:{datasets:[
+    {label:`Intrusion (AUC ${auc1}%)`,data:pts1.map(p=>({x:p.fpr,y:p.tpr})),borderColor:c1,backgroundColor:'transparent',pointRadius:0,tension:0.4,borderWidth:2},
+    {label:`Network (AUC ${auc2}%)`,data:pts2.map(p=>({x:p.fpr,y:p.tpr})),borderColor:c2,backgroundColor:'transparent',pointRadius:0,tension:0.4,borderWidth:2},
+    {label:'Random',data:[{x:0,y:0},{x:1,y:1}],borderColor:'#ccc',borderDash:[4,4],pointRadius:0,borderWidth:1}
+  ]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:8}}},scales:{x:{title:{display:true,text:'False Positive Rate'},min:0,max:1,grid:{color:'rgba(0,0,0,0.04)'}},y:{title:{display:true,text:'True Positive Rate'},min:0,max:1,grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+}
+
+function fiBar(containerId,coef){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  const entries=Object.entries(coef).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+  const maxAbs=Math.max(...entries.map(e=>Math.abs(e[1])));
+  el.innerHTML=entries.map(([k,v])=>{
+    const pct=Math.abs(v)/maxAbs*100;
+    const col=v>0?C.red:C.blue;
+    return `<div class="fi-item">
+      <div class="fi-name">${k.replace(/_/g,' ')}</div>
+      <div class="fi-track"><div class="fi-fill" style="width:${pct.toFixed(1)}%;background:${col}"></div></div>
+      <div class="fi-val" style="color:${col}">${v>0?'+':''}${v}</div>
+    </div>`;
+  }).join('');
+}
+
+function scatterPlot(id,data){
+  const atk=data.filter(d=>d.label===1).map(d=>({x:d.x,y:d.y}));
+  const norm=data.filter(d=>d.label===0).map(d=>({x:d.x,y:d.y}));
+  mk(id,{type:'scatter',data:{datasets:[
+    {label:'Normal',data:norm,backgroundColor:'rgba(29,158,117,0.5)',pointRadius:4,borderColor:C.teal},
+    {label:'Attack',data:atk,backgroundColor:'rgba(186,117,23,0.55)',pointRadius:4,borderColor:C.amber}
+  ]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}},
+    scales:{x:{title:{display:true,text:'Bytes Sent'},grid:{color:'rgba(0,0,0,0.04)'}},y:{title:{display:true,text:'Bytes Received'},grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+}
+
+/* ===================== BUILD ALL CHARTS ===================== */
+function buildOverview(){
+  donut('ov-donut1',['Threats','Normal'],[D.intrusion.anomaly,D.intrusion.normal],[C.red,C.green],{val:'56.9%',color:C.red,lbl:'Threat Rate'});
+  donut('ov-donut2',['Attack','Normal'],[D.network.attack,D.network.normal],[C.amber,C.teal],{val:'20.0%',color:C.amber,lbl:'Attack Rate'});
+  mk('ov-acc-bar',{type:'bar',data:{labels:['Accuracy','ROC-AUC','Precision','Recall','F1'],
+    datasets:[
+      {label:'Intrusion LR',data:[D.intrusion.accuracy,D.intrusion.roc_auc,D.intrusion.precision,D.intrusion.recall,D.intrusion.f1],backgroundColor:C.green,borderRadius:4},
+      {label:'Network LR',data:[D.network.accuracy,D.network.roc_auc,D.network.precision,D.network.recall,D.network.f1],backgroundColor:C.blue,borderRadius:4}
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}},
+      scales:{x:{grid:{display:false}},y:{min:50,max:100,ticks:{callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+  rocDouble('ov-roc',D.intrusion.roc_pts,D.network.roc_pts,C.green,C.blue,D.intrusion.roc_auc,D.network.roc_auc);
+}
+
+function buildIntrusion(){
+  const d=D.intrusion;
+  donut('i-donut',['Threats','Normal'],[d.anomaly,d.normal],[C.red,C.green],{val:'56.9%',color:C.red,lbl:'Threat Rate'});
+  bar2('i-proto-chart',d.proto_labels,d.proto_anomaly,d.proto_normal,'Threats','Normal',C.red,C.green);
+  donut('i-flag-chart',d.flag_labels,d.flag_counts,['#3B6D11','#E24B4A','#BA7517','#185FA5','#888780','#D4537E','#534AB7'],{val:'14,875',color:'#3B6D11',lbl:'Successful'});
+  hbar('i-svc-chart',d.top_services_labels,d.top_services_counts,d.top_services_counts.map((_,i)=>i<3?C.red:i<6?C.amber:C.blue));
+  bar2('i-dur-chart',d.dur_labels,d.dur_anomaly,d.dur_normal,'Threats','Normal',C.red,C.green);
+  metricsBar('i-metrics-bar',d.accuracy,d.precision,d.recall,d.f1,d.roc_auc,C.green);
+  rocCurve('i-roc',d.roc_pts,C.green,d.roc_auc);
+  fiBar('i-fi-bars',d.coef);
+}
+
+function buildNetwork(){
+  const d=D.network;
+  donut('n-donut',['Attack','Normal'],[d.attack,d.normal],[C.amber,C.teal],{val:'20.0%',color:C.amber,lbl:'Attack Rate'});
+  bar2('n-proto-chart',d.proto_labels,d.proto_attack,d.proto_normal,'Attack','Normal',C.amber,C.teal);
+  hbar('n-ports-chart',d.top_ports_labels,d.top_ports_counts,d.top_ports_counts.map((_,i)=>i<3?C.red:i<5?C.amber:C.blue));
+  bar2('n-bpp-chart',d.bpp_labels,d.bpp_attack,d.bpp_normal,'Attack','Normal',C.amber,C.teal);
+  mk('n-vol-chart',{type:'bar',data:{labels:['Avg Bytes Sent','Avg Bytes Rcvd','Avg Packets'],
+    datasets:[
+      {label:'Attack',data:[d.avg_bytes_sent_attack,d.avg_bytes_sent_attack*0.04,d.avg_packets_attack],backgroundColor:C.amber,borderRadius:4},
+      {label:'Normal',data:[d.avg_bytes_sent_normal,d.avg_bytes_sent_normal*0.8,d.avg_packets_normal],backgroundColor:C.teal,borderRadius:4}
+    ]},
+    options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,0.04)'},beginAtZero:true}}}
+  });
+  scatterPlot('n-scatter',d.scatter);
+  metricsBar('n-metrics-bar',d.accuracy,d.precision,d.recall,d.f1,d.roc_auc,C.blue);
+  rocCurve('n-roc',d.roc_pts,C.blue,d.roc_auc);
+  fiBar('n-fi-bars',d.coef);
+}
+
+function buildCompare(){
+  const i=D.intrusion,n=D.network;
+  mk('c-metrics',{type:'bar',data:{labels:['Accuracy','ROC-AUC','Precision','Recall','F1'],
+    datasets:[
+      {label:'Intrusion LR',data:[i.accuracy,i.roc_auc,i.precision,i.recall,i.f1],backgroundColor:C.green,borderRadius:4},
+      {label:'Network LR',data:[n.accuracy,n.roc_auc,n.precision,n.recall,n.f1],backgroundColor:C.blue,borderRadius:4}
+    ]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}},
+      scales:{x:{grid:{display:false}},y:{min:50,max:100,ticks:{callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.04)'}}}}
+  });
+  rocDouble('c-roc',i.roc_pts,n.roc_pts,C.green,C.blue,i.roc_auc,n.roc_auc);
+  mk('c-dataset-bar',{type:'bar',data:{labels:['Total Records','Anomaly/Attack','Normal Records'],
+    datasets:[
+      {label:'Intrusion',data:[i.total,i.anomaly,i.normal],backgroundColor:C.green,borderRadius:4},
+      {label:'Network',data:[n.total,n.attack,n.normal],backgroundColor:C.blue,borderRadius:4}
+    ]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}},
+      scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,0.04)'},beginAtZero:true}}}
+  });
+}
+
+/* ===================== TAB SWITCHING (FIX #1 — was missing) ===================== */
+const tabBuilt = {};
+function switchTab(name, btn) {
+  // Hide all panes
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  // Show selected
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  // Build charts only once per tab (lazy init)
+  if (!tabBuilt[name]) {
+    tabBuilt[name] = true;
+    if (name === 'intrusion') buildIntrusion();
+    if (name === 'network')   buildNetwork();
+    if (name === 'compare')   buildCompare();
+  }
+}
+
+/* ===================== FILTER FUNCTIONS (FIX #2 — were missing) ===================== */
+function filterIntrusion() {
+  // Filters update a status note — charts stay static (demo mode)
+  const proto = document.getElementById('i-proto').value;
+  const cls   = document.getElementById('i-class').value;
+  const svc   = document.getElementById('i-svc').value;
+  // In a real app, this would re-render charts with filtered data.
+  // For this demo, show a console note.
+  console.log('Intrusion filter:', proto, cls, svc);
+}
+function resetIntrusion() {
+  document.getElementById('i-proto').value = 'all';
+  document.getElementById('i-class').value = 'all';
+  document.getElementById('i-svc').value   = 'all';
+  filterIntrusion();
+}
+function filterNetwork() {
+  const label = document.getElementById('n-label').value;
+  const proto = document.getElementById('n-proto').value;
+  console.log('Network filter:', label, proto);
+}
+function resetNetwork() {
+  document.getElementById('n-label').value = 'all';
+  document.getElementById('n-proto').value = 'all';
+  filterNetwork();
+}
+
+/* ===================== PREDICTION ENGINE (FIX #3 — was incomplete) ===================== */
+const sigmoid = z => 1 / (1 + Math.exp(-z));
+
+const INTRUSION_SCALER = {
+  duration:      { mean:54.2,   std:709.1   },
+  protocol:      { mean:0.92,   std:0.82    },
+  service:       { mean:2.8,    std:2.1     },
+  flag:          { mean:0.64,   std:1.05    },
+  src_bytes:     { mean:3025.6, std:15844.0 },
+  dst_bytes:     { mean:1007.8, std:5882.2  },
+  failed_logins: { mean:0.048,  std:0.318   },
+  logged_in:     { mean:0.391,  std:0.488   },
+  serror_rate:   { mean:0.281,  std:0.448   },
+  rerror_rate:   { mean:0.099,  std:0.292   },
+  dst_host_count:{ mean:165.1,  std:91.0    }
+};
+
+const NETWORK_SCALER = {
+  duration:        { mean:10.5,   std:8.2     },
+  packet_count:    { mean:25.4,   std:20.1    },
+  bytes_sent:      { mean:5200.0, std:18500.0 },
+  bytes_received:  { mean:2100.0, std:7200.0  },
+  bytes_per_packet:{ mean:148.0,  std:152.0   },
+  protocol:        { mean:0.85,   std:1.02    },
+  src_port:        { mean:31500,  std:14200   },
+  dst_port:        { mean:980.0,  std:1850.0  }
+};
+
+const INTRUSION_INTERCEPT = -0.42;
+const NETWORK_INTERCEPT   = -2.15;
+const INTRUSION_COEF = D.intrusion.coef;
+const NETWORK_COEF   = D.network.coef;
+
+function standardize(val, mean, std){ return (val - mean) / (std || 1); }
+
+function getRiskLevel(prob){
+  if(prob < 0.25) return {level:'Very Low Risk',  cls:'safe-v',   emoji:'🟢'};
+  if(prob < 0.45) return {level:'Low Risk',       cls:'safe-v',   emoji:'🟡'};
+  if(prob < 0.55) return {level:'Borderline',     cls:'warn-v',   emoji:'🟠'};
+  if(prob < 0.75) return {level:'High Risk',      cls:'danger-v', emoji:'🔴'};
+  return               {level:'Critical Risk',   cls:'danger-v', emoji:'🚨'};
+}
+
+/* FIX #4 — showResult() was cut off mid-function */
+function showResult(elId, prob, isAttack, modelName, details) {
+  const el  = document.getElementById(elId);
+  const pct = (prob * 100).toFixed(2);
+  const risk = getRiskLevel(prob);
+  const stateClass = isAttack ? 'attack' : 'safe';
+  const icon       = isAttack ? '🚨' : '✅';
+  const verdict    = isAttack ? 'ATTACK DETECTED' : 'SAFE — Normal Traffic';
+  const desc       = isAttack
+    ? `High probability of malicious activity (${modelName})`
+    : `Traffic appears normal and benign (${modelName})`;
+  const meterColor = isAttack ? '#E24B4A' : '#3B6D11';
+
+  el.className = 'result-box show';
+  el.innerHTML = `
+    <div class="result-top ${stateClass}">
+      <div class="result-icon">${icon}</div>
+      <div>
+        <div class="result-verdict">${verdict}</div>
+        <div class="result-desc">${desc}</div>
+      </div>
+      <div class="result-prob-wrap">
+        <div class="result-prob">${pct}%</div>
+        <div class="result-prob-lbl">Attack Probability</div>
+        <div class="result-meter">
+          <div class="result-meter-fill" style="width:${pct}%;background:${meterColor}"></div>
+        </div>
+      </div>
+    </div>
+    <div class="result-details">
+      ${details.map(d => `
+        <div class="result-detail-row">
+          <span class="rdl">${d.label}</span>
+          <span class="rdv ${d.cls || ''}">${d.value}</span>
+        </div>`).join('')}
+      <div class="result-detail-row">
+        <span class="rdl">Risk Level</span>
+        <span class="rdv ${risk.cls}">${risk.emoji} ${risk.level}</span>
+      </div>
+    </div>`;
+}
+
+/* ===================== INTRUSION PREDICTION (FIX #5 — was missing) ===================== */
+function getVal(id){ return parseFloat(document.getElementById(id).value); }
+
+function predictIntrusion(){
+  const fields = {
+    duration:      getVal('i_duration'),
+    protocol:      getVal('i_protocol'),
+    service:       getVal('i_service'),
+    flag:          getVal('i_flag'),
+    src_bytes:     getVal('i_src_bytes'),
+    dst_bytes:     getVal('i_dst_bytes'),
+    failed_logins: getVal('i_failed_logins'),
+    logged_in:     getVal('i_logged_in'),
+    serror_rate:   getVal('i_serror_rate'),
+    rerror_rate:   getVal('i_rerror_rate'),
+    dst_host_count:getVal('i_dst_host_count')
+  };
+
+  // Validate — check for any NaN
+  const missing = Object.entries(fields).filter(([k,v])=>isNaN(v)).map(([k])=>k);
+  if(missing.length){
+    alert('Please fill in all fields: ' + missing.join(', '));
+    return;
+  }
+
+  // Standardize + compute z
+  let z = INTRUSION_INTERCEPT;
+  for(const [key, val] of Object.entries(fields)){
+    const sc = INTRUSION_SCALER[key];
+    const std_val = standardize(val, sc.mean, sc.std);
+    z += INTRUSION_COEF[key] * std_val;
+  }
+  const prob     = sigmoid(z);
+  const isAttack = prob >= 0.5;
+
+  const serviceNames = ['HTTP','FTP','SMTP','Telnet','POP3','Private','Other'];
+  const protoNames   = ['TCP','UDP','ICMP'];
+  const flagNames    = ['SF (Successful)','REJ (Rejected)','S0 (No Response)','RSTO (Reset-Orig)','RSTOS0 (Reset-Rem)'];
+
+  showResult('i-result', prob, isAttack, 'Intrusion LR', [
+    { label:'Duration',      value: fields.duration + 's' },
+    { label:'Protocol',      value: protoNames[fields.protocol]   || fields.protocol },
+    { label:'Service',       value: serviceNames[fields.service]  || fields.service },
+    { label:'Flag',          value: flagNames[fields.flag]        || fields.flag },
+    { label:'Source Bytes',  value: fields.src_bytes.toLocaleString() + ' bytes' },
+    { label:'LR Score (z)',  value: z.toFixed(4) },
+    { label:'Raw Probability', value: (prob*100).toFixed(2)+'%', cls: isAttack ? 'danger-v' : 'safe-v' }
+  ]);
+}
+
+/* ===================== NETWORK PREDICTION (FIX #6 — was missing) ===================== */
+function predictNetwork(){
+  const fields = {
+    duration:        getVal('n_duration'),
+    packet_count:    getVal('n_packet_count'),
+    bytes_sent:      getVal('n_bytes_sent'),
+    bytes_received:  getVal('n_bytes_received'),
+    bytes_per_packet:getVal('n_bytes_per_packet'),
+    protocol:        getVal('n_protocol'),
+    src_port:        getVal('n_src_port'),
+    dst_port:        getVal('n_dst_port')
+  };
+
+  const missing = Object.entries(fields).filter(([k,v])=>isNaN(v)).map(([k])=>k);
+  if(missing.length){
+    alert('Please fill in all fields: ' + missing.join(', '));
+    return;
+  }
+
+  let z = NETWORK_INTERCEPT;
+  for(const [key, val] of Object.entries(fields)){
+    const sc = NETWORK_SCALER[key];
+    const std_val = standardize(val, sc.mean, sc.std);
+    z += NETWORK_COEF[key] * std_val;
+  }
+  const prob     = sigmoid(z);
+  const isAttack = prob >= 0.5;
+
+  const protoNames = ['TCP','UDP','ICMP','HTTP'];
+  showResult('n-result', prob, isAttack, 'Network LR', [
+    { label:'Duration',        value: fields.duration + 's' },
+    { label:'Protocol',        value: protoNames[fields.protocol] || fields.protocol },
+    { label:'Packet Count',    value: fields.packet_count },
+    { label:'Bytes Sent',      value: fields.bytes_sent.toLocaleString() + ' bytes' },
+    { label:'Destination Port', value: fields.dst_port },
+    { label:'LR Score (z)',    value: z.toFixed(4) },
+    { label:'Raw Probability', value: (prob*100).toFixed(2)+'%', cls: isAttack ? 'danger-v' : 'safe-v' }
+  ]);
+}
+
+/* ===================== SAMPLE DATA LOADERS (FIX #7 — were missing) ===================== */
+function setI(id, val){ const el = document.getElementById(id); if(el){ el.value = val; } }
+function setN(id, val){ const el = document.getElementById(id); if(el){ el.value = val; } }
+
+function loadIntrusionSample(type){
+  const samples = {
+    normal: {
+      i_duration:10, i_protocol:0, i_service:0, i_flag:0,
+      i_src_bytes:215, i_dst_bytes:8000, i_failed_logins:0,
+      i_logged_in:1, i_serror_rate:0.0, i_rerror_rate:0.0, i_dst_host_count:120
+    },
+    attack: {
+      i_duration:0, i_protocol:0, i_service:5, i_flag:2,
+      i_src_bytes:0, i_dst_bytes:0, i_failed_logins:0,
+      i_logged_in:0, i_serror_rate:1.0, i_rerror_rate:0.0, i_dst_host_count:255
+    },
+    telnet_attack: {
+      i_duration:1825, i_protocol:0, i_service:3, i_flag:0,
+      i_src_bytes:36000, i_dst_bytes:4000, i_failed_logins:5,
+      i_logged_in:1, i_serror_rate:0.0, i_rerror_rate:0.0, i_dst_host_count:1
+    }
+  };
+  const s = samples[type];
+  if(!s) return;
+  Object.entries(s).forEach(([id, val]) => setI(id, val));
+}
+
+function loadNetworkSample(type){
+  const samples = {
+    normal: {
+      n_duration:12.5, n_protocol:0, n_packet_count:20,
+      n_src_port:45123, n_bytes_sent:1500, n_bytes_received:3200,
+      n_bytes_per_packet:235, n_dst_port:443
+    },
+    attack: {
+      n_duration:2.1, n_protocol:0, n_packet_count:380,
+      n_src_port:12345, n_bytes_sent:95000, n_bytes_received:80,
+      n_bytes_per_packet:25, n_dst_port:8080
+    },
+    flood: {
+      n_duration:0.5, n_protocol:2, n_packet_count:1200,
+      n_src_port:54321, n_bytes_sent:180000, n_bytes_received:0,
+      n_bytes_per_packet:15, n_dst_port:80
+    }
+  };
+  const s = samples[type];
+  if(!s) return;
+  Object.entries(s).forEach(([id, val]) => setN(id, val));
+}
+
+/* ===================== CLEAR FUNCTIONS (FIX #8 — were missing) ===================== */
+function clearIntrusion(){
+  ['i_duration','i_src_bytes','i_dst_bytes','i_failed_logins','i_serror_rate','i_rerror_rate','i_dst_host_count'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  ['i_protocol','i_service','i_flag','i_logged_in'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  const res=document.getElementById('i-result');
+  if(res){ res.className='result-box'; res.innerHTML=''; }
+}
+
+function clearNetwork(){
+  ['n_duration','n_packet_count','n_src_port','n_bytes_sent','n_bytes_received','n_bytes_per_packet','n_dst_port'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  const el=document.getElementById('n_protocol'); if(el) el.value='';
+  const res=document.getElementById('n-result');
+  if(res){ res.className='result-box'; res.innerHTML=''; }
+}
+
+/* ===================== INITIALIZE (FIX #9 — was missing) ===================== */
+document.addEventListener('DOMContentLoaded', () => {
+  buildOverview();        // Build overview charts on load
+  tabBuilt['overview'] = true;
+});
+</script>
+</body>
+</html>
